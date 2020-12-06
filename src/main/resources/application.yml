@@ -1,0 +1,20 @@
+networks:
+  xrp:
+    env: TESTNET
+    name: XRPL
+    wallet_seed: shpAMNtD4PnXtA89eeDL4uw9vCjkV
+    amount: 10000000
+    server: test.xrp.xpring.io:50051
+  ether:
+    name: ETH
+    env: ROPSTEN
+    wallet_seed: 0x9c24D77E8A24dE30be9a3e6267f110C602d8EAd7
+    amount: 0.0001
+    server:
+  bitcoin:
+    name: BTC
+    env:
+    wallet_seed: mmEva6Kq5feCSgqs6Xv3GAkJzymjS7azKV
+    amount: 0.000001
+    server:
+
