@@ -27,9 +27,6 @@ public class GitPayApplication {
    @Autowired
    XRPController xrpController;
 
-   @Value("${name}")
-   private String name;
-
    @Autowired
    private ConfigurableApplicationContext context;
 
@@ -41,7 +38,7 @@ public class GitPayApplication {
    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
       return args -> {
 
-         System.out.println("Running the application" + name);
+         System.out.println("Running the application");
          List<Address> addresses = xrpController.getAddresses("deepakvalluru$ripplex.money");
          addresses.forEach(System.out::println);
          SpringApplication.exit( context );

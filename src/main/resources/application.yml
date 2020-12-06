@@ -16,6 +16,3 @@ bitcoin:
   wallet_seed: mmEva6Kq5feCSgqs6Xv3GAkJzymjS7azKV
   amount: 0.000001
   server:
-
-name: ${name_env:DeepakFromAppYaml}
-

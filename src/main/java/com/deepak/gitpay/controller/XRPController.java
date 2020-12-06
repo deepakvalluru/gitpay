@@ -41,11 +41,14 @@ public class XRPController {
       List<Address> addresses = new PayIdClient().allAddressesForPayId( payId );
 
       XrplNetwork network = getXrplNetwork( config.getXrpNetwork().getEnvironment() );
+      System.out.println("Using XRP Environment : " + network.getNetworkName());
 
       XrpPayIdClient xrpPayIdClient = new XrpPayIdClient( network );
       XrpClient xrpClient = new XrpClient( config.getXrpNetwork().getServer(), network );
 
       XpringClient xpringClient = new XpringClient( xrpPayIdClient, xrpClient );
+
+      System.out.println("Sending xrp amount in drops: " + config.getXrpNetwork().getAmount() + " to payId " + payId);
 
       xpringClient.send( new BigInteger( config.getXrpNetwork().getAmount()), payId, new Wallet( config.getXrpNetwork().getWalletSeed() ) );
 
