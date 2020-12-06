@@ -14,6 +14,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import java.io.IOException;
@@ -26,6 +27,9 @@ public class GitPayApplication {
    @Autowired
    XRPController xrpController;
 
+   @Autowired
+   private ConfigurableApplicationContext context;
+
    public static void main(String[] args) {
       SpringApplication.run(GitPayApplication.class, args);
    }
@@ -37,6 +41,7 @@ public class GitPayApplication {
          System.out.println("Running the application");
          List<Address> addresses = xrpController.getAddresses("deepakvalluru$ripplex.money");
          addresses.forEach(System.out::println);
+         SpringApplication.exit( context );
       };
    }
 
