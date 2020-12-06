@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import io.xpring.payid.generated.model.Address;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +19,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 @SpringBootApplication
@@ -26,6 +26,9 @@ public class GitPayApplication {
 
    @Autowired
    XRPController xrpController;
+
+   @Value("${name}")
+   private String name;
 
    @Autowired
    private ConfigurableApplicationContext context;
@@ -38,7 +41,7 @@ public class GitPayApplication {
    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
       return args -> {
 
-         System.out.println("Running the application");
+         System.out.println("Running the application" + name);
          List<Address> addresses = xrpController.getAddresses("deepakvalluru$ripplex.money");
          addresses.forEach(System.out::println);
          SpringApplication.exit( context );

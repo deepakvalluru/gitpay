@@ -1,0 +1,8 @@
+#
+# Build stage
+#
+FROM maven:3.6.0-jdk-11-slim
+COPY src /home/app/src
+COPY pom.xml /home/app
+#RUN mvn -f /home/app/pom.xml compile com.google.cloud.tools:jib-maven-plugin:2.6.0:dockerBuild
+RUN cd /home/app && mvn compile com.google.cloud.tools:jib-maven-plugin:2.6.0:dockerBuild

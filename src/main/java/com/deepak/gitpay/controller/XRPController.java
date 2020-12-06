@@ -23,14 +23,15 @@ import java.util.List;
 
 @RestController
 public class XRPController {
+
    private final XRPService xrpService;
+   private final Config config;
 
    @Autowired
-   private Config config;
-
-   @Autowired
-   XRPController(XRPService xrpService) {
+   XRPController( XRPService xrpService,
+                  Config config ) {
       this.xrpService = xrpService;
+      this.config = config;
    }
 
    @GetMapping("/payid/{payId}")

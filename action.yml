@@ -1,0 +1,25 @@
+name: 'Automatically pay Contributors in Crypto like XRP, Bitcoin and Ether via PayId'
+description: 'Scan commit messages for PayId and make payment to that PayId in XRP on push'
+author: 'Deepak Valluru'
+branding:
+  icon: dollar-sign
+  color: green
+inputs:
+  xrp_env:
+    description: 'XRP Environment to use: TESTNET, MAINNET OR LIVENET'
+    required: false
+    default: TESTNET
+  xrp_wallet_seed:
+    description: 'The seed (private key) for xrp where the payments are made from'
+    required: true
+  xrp_amount:
+    description: 'Default xrp amount that will be paid in drops to the contributors'
+    required: false
+    default: '10000000'
+  xrp_server:
+    description: 'XRP ledger server to use for transactions'
+    required: false
+    default: test.xrp.xpring.io:50051
+runs:
+  using: docker
+  image: Dockerfile
