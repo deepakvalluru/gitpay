@@ -6,7 +6,7 @@ name: gitpay
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -28,4 +28,4 @@ jobs:
         with:
           xrp_wallet_seed: ${{ secrets.XRP_WALLET_SEED }}
           xrp_amount: 1000000
-          github_event: ${{ toJson( github ) }}
+          github_event: ${{ toJson(github) }}
