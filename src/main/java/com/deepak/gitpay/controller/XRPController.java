@@ -37,6 +37,8 @@ public class XRPController {
    @GetMapping("/payid/{payId}")
    public List<Address> getAddresses( @PathVariable("payId") String payId ) throws PayIdException, XrpException {
 
+      System.out.println("Github event: " + config.getGithubEvent() );
+
       System.out.println("Running get address: " + payId);
       List<Address> addresses = new PayIdClient().allAddressesForPayId( payId );
 

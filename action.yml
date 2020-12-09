@@ -5,6 +5,9 @@ branding:
   icon: dollar-sign
   color: green
 inputs:
+  github_event:
+    description: 'The event that triggered the github action'
+    required: true
   xrp_env:
     description: 'XRP Environment to use: TESTNET, MAINNET OR LIVENET'
     required: false
