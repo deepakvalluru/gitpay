@@ -24,7 +24,16 @@ jobs:
     steps:
       - name: get commit message
         run: |
+          # disable command workflow processing
+          echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
+
+          # log untrusted output
+          echo "untrusted output"
           echo ::set-env name=commit_log::$(git log --format=%B ${{ github.event.before }}..${{ github.event.after }})
+
+          # enable workflow command processing
+          echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
+
       # Runs a set of commands using the runners shell
       - name: Run gitpay
         uses: deepakvalluru/gitpay@master
