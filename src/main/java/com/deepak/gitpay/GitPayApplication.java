@@ -39,8 +39,7 @@ public class GitPayApplication {
       return args -> {
 
          System.out.println("Running the application");
-         List<Address> addresses = xrpController.getAddresses("deepakvalluru$ripplex.money");
-         addresses.forEach(System.out::println);
+         xrpController.getAddresses();
          SpringApplication.exit( context );
       };
    }
