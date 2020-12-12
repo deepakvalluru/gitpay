@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +51,11 @@ public class XRPController {
       System.out.println("Github event: " + config.getGithubEvent() );
 
       Root actionEvent = objectMapper.readValue( config.getGithubEvent(), Root.class);
+      if(Objects.isNull( actionEvent.getEvent().getCommits()))
+      {
+         System.out.println("NO COMMITS FOUND..NOTHING CAN BE DONE");
+      }
+
       System.out.println( "printing marshalled action event's commits: \n" + actionEvent.getEvent().getCommits() );
 
       List<String> allPayIds = new ArrayList<>();
