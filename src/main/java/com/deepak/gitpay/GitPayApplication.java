@@ -56,7 +56,7 @@ public class GitPayApplication {
 
    class MyDtoNullKeySerializer extends JsonSerializer<Object> {
       @Override
-      public void serialize(Object nullKey, JsonGenerator jsonGenerator, SerializerProvider unused) throws IOException, JsonProcessingException {
+      public void serialize(Object nullKey, JsonGenerator jsonGenerator, SerializerProvider unused) throws IOException {
          jsonGenerator.writeFieldName("");
       }
    }
