@@ -2,9 +2,6 @@ package com.deepak.gitpay.controller;
 
 import com.deepak.gitpay.config.Config;
 import com.deepak.gitpay.config.XRPNetwork;
-import com.deepak.gitpay.model.AmountTransferRequest;
-import com.deepak.gitpay.model.AmountTransferResponse;
-import com.deepak.gitpay.model.BalanceResponse;
 import com.deepak.gitpay.model.github.Root;
 import com.deepak.gitpay.service.XRPService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,7 +15,8 @@ import io.xpring.xrpl.Wallet;
 import io.xpring.xrpl.XrpClient;
 import io.xpring.xrpl.XrpException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -74,8 +72,6 @@ public class XRPController {
 
       for ( String payId : allPayIds )
       {
-//         List<Address> addresses = new PayIdClient().allAddressesForPayId( payId );
-
          XrplNetwork network = getXrplNetwork( config.getXrpNetwork().getEnvironment() );
          System.out.println("Using XRP Environment : " + network.getNetworkName());
 
@@ -84,7 +80,7 @@ public class XRPController {
 
          XpringClient xpringClient = new XpringClient( xrpPayIdClient, xrpClient );
 
-         System.out.println("Sending xrp amount in drops: " + config.getXrpNetwork().getAmount() + " to payId " + payId);
+         System.out.println("Sending xrp amount in drops: " + config.getXrpNetwork().getAmount() + " to payId: " + payId + " and XRP Address: " + xrpPayIdClient.xrpAddressForPayId(payId) );
 
          String transactionHash = xpringClient.send(new BigInteger(config.getXrpNetwork().getAmount()), payId, new Wallet(config.getXrpNetwork().getWalletSeed()));
 
@@ -106,14 +102,4 @@ public class XRPController {
       }
    }
 
-   @GetMapping(path = "balances/{address}")
-   public BalanceResponse getBalance(@PathVariable("address") String address) {
-      return xrpService.getBalance(address);
-   }
-
-   @PostMapping(path = "/send")
-   public @ResponseBody
-   AmountTransferResponse sendAmount(@RequestBody AmountTransferRequest amountTransferRequest) {
-      return xrpService.sendAmount(amountTransferRequest);
-   }
 }
