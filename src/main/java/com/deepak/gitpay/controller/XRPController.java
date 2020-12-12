@@ -8,12 +8,11 @@ import com.deepak.gitpay.model.BalanceResponse;
 import com.deepak.gitpay.model.github.Root;
 import com.deepak.gitpay.service.XRPService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.xpring.common.XrplNetwork;
-import io.xpring.payid.PayIdClient;
 import io.xpring.payid.PayIdException;
 import io.xpring.payid.XrpPayIdClient;
-import io.xpring.payid.generated.model.Address;
 import io.xpring.xpring.XpringClient;
 import io.xpring.xrpl.Wallet;
 import io.xpring.xrpl.XrpClient;
@@ -35,12 +34,14 @@ public class XRPController {
 
    public static final String PAY_ID_PATTERN = "(\\S+\\$\\S+\\.\\S+)";
    public static final Pattern pattern = Pattern.compile( PAY_ID_PATTERN );
+   public static final ObjectMapper objectMapper = new ObjectMapper();
 
    @Autowired
    XRPController( XRPService xrpService,
                   Config config ) {
       this.xrpService = xrpService;
       this.config = config;
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
    }
 
    @GetMapping("/payid")
@@ -48,7 +49,7 @@ public class XRPController {
 
       System.out.println("Github event: " + config.getGithubEvent() );
 
-      Root actionEvent = new ObjectMapper().readValue( config.getGithubEvent(), Root.class);
+      Root actionEvent = objectMapper.readValue( config.getGithubEvent(), Root.class);
       System.out.println( "printing marshalled action event's commits: \n" + actionEvent.getEvent().getCommits() );
 
       List<String> allPayIds = new ArrayList<>();
