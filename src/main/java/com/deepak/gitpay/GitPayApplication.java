@@ -34,7 +34,7 @@ public class GitPayApplication {
       SpringApplication.run(GitPayApplication.class, args);
    }
 
-//   @Bean
+   @Bean
    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
       return args -> {
 
