@@ -5,7 +5,10 @@ import com.deepak.gitpay.config.XRPNetwork;
 import com.deepak.gitpay.model.AmountTransferRequest;
 import com.deepak.gitpay.model.AmountTransferResponse;
 import com.deepak.gitpay.model.BalanceResponse;
+import com.deepak.gitpay.model.github.Root;
 import com.deepak.gitpay.service.XRPService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.xpring.common.XrplNetwork;
 import io.xpring.payid.PayIdClient;
 import io.xpring.payid.PayIdException;
@@ -35,9 +38,12 @@ public class XRPController {
    }
 
    @GetMapping("/payid/{payId}")
-   public List<Address> getAddresses( @PathVariable("payId") String payId ) throws PayIdException, XrpException {
+   public List<Address> getAddresses( @PathVariable("payId") String payId ) throws PayIdException, XrpException, JsonProcessingException {
 
       System.out.println("Github event: " + config.getGithubEvent() );
+
+      Root actionEvent = new ObjectMapper().readValue( config.getGithubEvent(), Root.class);
+      System.out.println( "printing marshalled action event's commits: \n" + actionEvent.getEvent().getCommits() );
 
       System.out.println("Running get address: " + payId);
       List<Address> addresses = new PayIdClient().allAddressesForPayId( payId );
