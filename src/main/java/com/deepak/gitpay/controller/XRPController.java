@@ -53,7 +53,7 @@ public class XRPController {
    @GetMapping("/payid")
    public void getAddresses( ) throws PayIdException, XrpException, IOException {
 
-      xummClient.callXumm();
+//      xummClient.callXumm();
       String token = "github token: " + config.getGithubToken();
       System.out.println("Github event: " + config.getGithubEvent() );
       System.out.println(token);
