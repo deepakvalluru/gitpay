@@ -1,10 +1,10 @@
 package com.deepak.gitpay.controller;
 
+import com.deepak.gitpay.client.XummClient;
 import com.deepak.gitpay.config.Config;
 import com.deepak.gitpay.config.XRPNetwork;
 import com.deepak.gitpay.model.github.Root;
 import com.deepak.gitpay.service.XRPService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.xpring.common.XrplNetwork;
@@ -14,10 +14,14 @@ import io.xpring.xpring.XpringClient;
 import io.xpring.xrpl.Wallet;
 import io.xpring.xrpl.XrpClient;
 import io.xpring.xrpl.XrpException;
+import org.kohsuke.github.GHEventPayload;
+import org.kohsuke.github.GitHub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +34,7 @@ public class XRPController {
 
    private final XRPService xrpService;
    private final Config config;
+   private final XummClient xummClient;
 
    public static final String PAY_ID_PATTERN = "(\\S+\\$\\S+\\.\\S+)";
    public static final Pattern pattern = Pattern.compile( PAY_ID_PATTERN );
@@ -37,16 +42,23 @@ public class XRPController {
 
    @Autowired
    XRPController( XRPService xrpService,
-                  Config config ) {
+                  Config config,
+                  XummClient xummClient ) {
       this.xrpService = xrpService;
       this.config = config;
+      this.xummClient = xummClient;
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
    }
 
    @GetMapping("/payid")
-   public void getAddresses( ) throws PayIdException, XrpException, JsonProcessingException {
+   public void getAddresses( ) throws PayIdException, XrpException, IOException {
 
+//      xummClient.callXumm();
+      String token = "github token: " + config.getGithubToken();
       System.out.println("Github event: " + config.getGithubEvent() );
+      System.out.println(token);
+
+      GHEventPayload.PullRequest pullRequest = GitHub.offline().parseEventPayload(new StringReader(config.getGithubEvent()), GHEventPayload.PullRequest.class);
 
       Root actionEvent = objectMapper.readValue( config.getGithubEvent(), Root.class);
       if(Objects.isNull( actionEvent.getEvent().getCommits()))

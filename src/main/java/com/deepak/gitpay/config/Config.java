@@ -20,4 +20,7 @@ public class Config
 
    @Value("${github_event}")
    private String githubEvent;
+
+   @Value("${github_token}")
+   private String githubToken;
 }

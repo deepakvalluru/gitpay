@@ -5,10 +5,11 @@ name: gitpay
 # Controls when the action will run. 
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ master ]
-#  pull_request:
+#  push:
 #    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    types: [closed]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -17,6 +18,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
+#    if: github.event.pull_request.merged == 'true'
     # The type of runner that the job will run on
     runs-on: Ubuntu-20.04
 
@@ -28,4 +30,5 @@ jobs:
         with:
           xrp_wallet_seed: ${{ secrets.XRP_WALLET_SEED }}
           xrp_amount: 1000000
-          github_event: ${{ toJson(github) }}
+          github_event: ${{ toJson(github.event) }}
+          github_token: ${{ github.token }}
