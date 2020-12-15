@@ -31,3 +31,4 @@ jobs:
           xrp_wallet_seed: ${{ secrets.XRP_WALLET_SEED }}
           xrp_amount: 1000000
           github_event: ${{ toJson(github.event) }}
+          github_token: ${{ github.token }}
