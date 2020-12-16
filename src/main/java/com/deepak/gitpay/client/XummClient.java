@@ -2,6 +2,7 @@ package com.deepak.gitpay.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.xpring.xrpl.Utils;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.http.HttpEntity;
@@ -24,11 +25,15 @@ public class XummClient
 
    private final ObjectMapper objectMapper = new ObjectMapper();
 
-   public void callXumm()
+   public void callXumm(String destination, String amount)
    {
       try
       {
-         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(getXummPaymentRequest()), getHttpHeaders());
+         if (Utils.isValidXAddress(destination))
+         {
+            destination = Utils.decodeXAddress(destination).address();
+         }
+         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(getXummPaymentRequest( destination, amount )), getHttpHeaders());
          ResponseEntity<String> response = restTemplate.postForEntity(XUMM_URL, entity, String.class);
          System.out.println( "Xumm response : " + response.getBody());
       }
@@ -39,9 +44,9 @@ public class XummClient
 
    }
 
-   private XummPayment getXummPaymentRequest() {
+   private XummPayment getXummPaymentRequest(String destination, String amount) {
       XummPayment paymentRequest = new XummPayment();
-      Txjson txjson = Txjson.builder().transactionType("Payment").destination("rwiETSee2wMz3SBnAG8hkMsCgvGy9LWbZ1").amount("20000000").build();
+      Txjson txjson = Txjson.builder().transactionType("Payment").destination(destination).amount(amount).build();
       Options options = Options.builder().expire("1440").multisign("false").submit("true").build();
       paymentRequest.setTxjson(txjson);
       paymentRequest.setOptions(options);

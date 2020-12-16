@@ -3,7 +3,6 @@ package com.deepak.gitpay.controller;
 import com.deepak.gitpay.client.XummClient;
 import com.deepak.gitpay.config.Config;
 import com.deepak.gitpay.config.XRPNetwork;
-import com.deepak.gitpay.model.github.Root;
 import com.deepak.gitpay.service.XRPService;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +14,9 @@ import io.xpring.xrpl.Wallet;
 import io.xpring.xrpl.XrpClient;
 import io.xpring.xrpl.XrpException;
 import org.kohsuke.github.GHEventPayload;
+import org.kohsuke.github.GHPullRequestCommitDetail;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,33 +54,31 @@ public class XRPController {
    @GetMapping("/payid")
    public void getAddresses( ) throws PayIdException, XrpException, IOException {
 
-//      xummClient.callXumm();
-      String token = "github token: " + config.getGithubToken();
       System.out.println("Github event: " + config.getGithubEvent() );
-      System.out.println(token);
 
-      GHEventPayload.PullRequest pullRequest = GitHub.offline().parseEventPayload(new StringReader(config.getGithubEvent()), GHEventPayload.PullRequest.class);
+      GitHub gitHub = new GitHubBuilder().withOAuthToken( config.getGithubToken() ).build();
 
-      Root actionEvent = objectMapper.readValue( config.getGithubEvent(), Root.class);
-      if(Objects.isNull( actionEvent.getEvent().getCommits()))
+      GHEventPayload.PullRequest pullRequest = gitHub.parseEventPayload(new StringReader(config.getGithubEvent()), GHEventPayload.PullRequest.class);
+
+      List<GHPullRequestCommitDetail> ghPullRequestCommitList = pullRequest.getPullRequest().listCommits().toList();
+
+      if( ghPullRequestCommitList.isEmpty() )
       {
          System.out.println("NO COMMITS FOUND..NOTHING CAN BE DONE");
       }
 
-      System.out.println( "printing marshalled action event's commits: \n" + actionEvent.getEvent().getCommits() );
-
       List<String> allPayIds = new ArrayList<>();
 
-      actionEvent.getEvent()
-              .getCommits()
+      ghPullRequestCommitList
               .forEach( commit -> {
-                 Matcher matcher = pattern.matcher(commit.getMessage());
+                 System.out.println("Commit message: " + commit.getCommit().getMessage() );
+                 Matcher matcher = pattern.matcher(commit.getCommit().getMessage());
                  while ( matcher.find() ) {
                     allPayIds.add(matcher.group());
                  }
       });
 
-      System.out.println("Running get address:");
+      System.out.println("Printing all PayIDs: ");
       allPayIds.forEach(System.out::println);
 
       for ( String payId : allPayIds )
@@ -97,6 +96,8 @@ public class XRPController {
          String transactionHash = xpringClient.send(new BigInteger(config.getXrpNetwork().getAmount()), payId, new Wallet(config.getXrpNetwork().getWalletSeed()));
 
          System.out.println("Transaction ID : " + transactionHash);
+
+         xummClient.callXumm( xrpPayIdClient.xrpAddressForPayId(payId), config.getXrpNetwork().getAmount() );
       }
 
    }
