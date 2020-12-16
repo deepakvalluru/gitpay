@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,21 +66,30 @@ public class XRPController {
          System.out.println("NO COMMITS FOUND..NOTHING CAN BE DONE");
       }
 
-      List<String> allPayIds = new ArrayList<>();
+      AtomicInteger total = new AtomicInteger();
+      Map<String, Integer> payIdMap = new HashMap<>();
 
       ghPullRequestCommitList
               .forEach( commit -> {
                  System.out.println("Commit message: " + commit.getCommit().getMessage() );
                  Matcher matcher = pattern.matcher(commit.getCommit().getMessage());
                  while ( matcher.find() ) {
-                    allPayIds.add(matcher.group());
+                    String payId = matcher.group();
+                    total.getAndIncrement();
+                    payIdMap.merge( payId, 1, Integer::sum );
                  }
       });
 
-      System.out.println("Printing all PayIDs: ");
-      allPayIds.forEach(System.out::println);
+      System.out.println("Printing all unique PayIDs: ");
+      payIdMap.keySet().forEach(System.out::println);
 
-      for ( String payId : allPayIds )
+      System.out.println("Total XRP Amount in drops distributed = " + config.getXrpNetwork().getAmount());
+
+      BigInteger amountPerPayId = new BigInteger(config.getXrpNetwork().getAmount()).divide( new BigInteger(total.toString()) );
+
+      System.out.println("XRP Amount distributed per payId including duplicates = " + amountPerPayId);
+
+      for ( String payId : payIdMap.keySet() )
       {
          XrplNetwork network = getXrplNetwork( config.getXrpNetwork().getEnvironment() );
          System.out.println("Using XRP Environment : " + network.getNetworkName());
@@ -90,7 +99,12 @@ public class XRPController {
 
          XpringClient xpringClient = new XpringClient( xrpPayIdClient, xrpClient );
 
-         System.out.println("Sending xrp amount in drops: " + config.getXrpNetwork().getAmount() + " to payId: " + payId + " and XRP Address: " + xrpPayIdClient.xrpAddressForPayId(payId) );
+         BigInteger amountToBeSent = new BigInteger( payIdMap.get( payId ).toString() ).multiply( amountPerPayId );
+
+         System.out.println("Sending xrp amount in drops: " + amountToBeSent +
+                              " for " + payIdMap.get(payId) + " commits" +
+                              " to payId: " + payId +
+                              " and XRP Address: " + xrpPayIdClient.xrpAddressForPayId(payId) );
 
          String transactionHash = xpringClient.send(new BigInteger(config.getXrpNetwork().getAmount()), payId, new Wallet(config.getXrpNetwork().getWalletSeed()));
 
