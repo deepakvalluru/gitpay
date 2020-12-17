@@ -100,7 +100,7 @@ public class XRPController {
 
          if( !xrpAddress.isPresent() )
          {
-            System.out.println("Skipping the payment because payid is not valid");
+            System.out.println("Skipping the payment because payId is not valid");
             continue;
          }
 
@@ -111,7 +111,7 @@ public class XRPController {
          BigInteger amountToBeSent = new BigInteger( payIdMap.get( payId ).toString() ).multiply( amountPerPayId );
 
          System.out.println("Sending xrp amount in drops: " + amountToBeSent +
-                              " for " + payIdMap.get(payId) + " commits" +
+                              " for " + payIdMap.get(payId) + " commit(s)" +
                               " to payId: " + payId +
                               " and XRP Address: " + xrpAddress.get() );
 
