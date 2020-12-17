@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,39 +66,75 @@ public class XRPController {
          System.out.println("NO COMMITS FOUND..NOTHING CAN BE DONE");
       }
 
-      List<String> allPayIds = new ArrayList<>();
+      AtomicInteger total = new AtomicInteger();
+      Map<String, Integer> payIdMap = new HashMap<>();
 
       ghPullRequestCommitList
               .forEach( commit -> {
                  System.out.println("Commit message: " + commit.getCommit().getMessage() );
                  Matcher matcher = pattern.matcher(commit.getCommit().getMessage());
                  while ( matcher.find() ) {
-                    allPayIds.add(matcher.group());
+                    String payId = matcher.group();
+                    total.getAndIncrement();
+                    payIdMap.merge( payId, 1, Integer::sum );
                  }
       });
 
-      System.out.println("Printing all PayIDs: ");
-      allPayIds.forEach(System.out::println);
+      System.out.println("Printing all unique PayIDs: ");
+      payIdMap.keySet().forEach(System.out::println);
 
-      for ( String payId : allPayIds )
+      System.out.println("Total XRP Amount in drops distributed = " + config.getXrpNetwork().getAmount());
+
+      BigInteger amountPerPayId = new BigInteger(config.getXrpNetwork().getAmount()).divide( new BigInteger(total.toString()) );
+
+      System.out.println("XRP Amount distributed per payId including duplicates = " + amountPerPayId);
+
+      for ( String payId : payIdMap.keySet() )
       {
          XrplNetwork network = getXrplNetwork( config.getXrpNetwork().getEnvironment() );
          System.out.println("Using XRP Environment : " + network.getNetworkName());
 
          XrpPayIdClient xrpPayIdClient = new XrpPayIdClient( network );
+
+         final Optional<String> xrpAddress = getXrpAddress(xrpPayIdClient, payId);
+
+         if( !xrpAddress.isPresent() )
+         {
+            System.out.println("Skipping the payment because payid is not valid");
+            continue;
+         }
+
          XrpClient xrpClient = new XrpClient( config.getXrpNetwork().getServer(), network );
 
          XpringClient xpringClient = new XpringClient( xrpPayIdClient, xrpClient );
 
-         System.out.println("Sending xrp amount in drops: " + config.getXrpNetwork().getAmount() + " to payId: " + payId + " and XRP Address: " + xrpPayIdClient.xrpAddressForPayId(payId) );
+         BigInteger amountToBeSent = new BigInteger( payIdMap.get( payId ).toString() ).multiply( amountPerPayId );
+
+         System.out.println("Sending xrp amount in drops: " + amountToBeSent +
+                              " for " + payIdMap.get(payId) + " commits" +
+                              " to payId: " + payId +
+                              " and XRP Address: " + xrpAddress.get() );
 
          String transactionHash = xpringClient.send(new BigInteger(config.getXrpNetwork().getAmount()), payId, new Wallet(config.getXrpNetwork().getWalletSeed()));
 
          System.out.println("Transaction ID : " + transactionHash);
 
-         xummClient.callXumm( xrpPayIdClient.xrpAddressForPayId(payId), config.getXrpNetwork().getAmount() );
+         xummClient.callXumm( xrpAddress.get(), config.getXrpNetwork().getAmount() );
       }
 
+   }
+
+   private Optional<String> getXrpAddress(XrpPayIdClient xrpPayIdClient, String payId)
+   {
+      Optional classicXrpAddress = Optional.empty();
+      try {
+         classicXrpAddress = Optional.of( xrpPayIdClient.xrpAddressForPayId(payId) );
+         System.out.println( payId + " resolves to xrpAddress : " + classicXrpAddress );
+      } catch (PayIdException e) {
+         System.out.println("Invalid Pay Id : " + e.getMessage() );
+      }
+
+      return classicXrpAddress;
    }
 
    private XrplNetwork getXrplNetwork(XRPNetwork.Env env )
