@@ -115,7 +115,7 @@ public class XRPController {
                               " to payId: " + payId +
                               " and XRP Address: " + xrpAddress.get() );
 
-         String transactionHash = xpringClient.send(new BigInteger(config.getXrpNetwork().getAmount()), payId, new Wallet(config.getXrpNetwork().getWalletSeed()));
+         String transactionHash = xpringClient.send( amountToBeSent, payId, new Wallet(config.getXrpNetwork().getWalletSeed()));
 
          System.out.println("Transaction ID : " + transactionHash);
 
@@ -129,9 +129,9 @@ public class XRPController {
       Optional classicXrpAddress = Optional.empty();
       try {
          classicXrpAddress = Optional.of( xrpPayIdClient.xrpAddressForPayId(payId) );
-         System.out.println( payId + " resolves to xrpAddress : " + classicXrpAddress );
+         System.out.println( payId + " resolves to xrpAddress : " + classicXrpAddress.get() );
       } catch (PayIdException e) {
-         System.out.println("Invalid Pay Id : " + e.getMessage() );
+         System.out.println("Invalid Pay Id : " + payId + " because of " + e.getMessage() );
       }
 
       return classicXrpAddress;
