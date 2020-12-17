@@ -96,7 +96,7 @@ public class XRPController {
 
          XrpPayIdClient xrpPayIdClient = new XrpPayIdClient( network );
 
-         final Optional xrpAddress = getXrpAddress(xrpPayIdClient, payId);
+         final Optional<String> xrpAddress = getXrpAddress(xrpPayIdClient, payId);
 
          if( !xrpAddress.isPresent() )
          {
@@ -119,12 +119,12 @@ public class XRPController {
 
          System.out.println("Transaction ID : " + transactionHash);
 
-         xummClient.callXumm( xrpPayIdClient.xrpAddressForPayId(payId), config.getXrpNetwork().getAmount() );
+         xummClient.callXumm( xrpAddress.get(), config.getXrpNetwork().getAmount() );
       }
 
    }
 
-   private Optional getXrpAddress(XrpPayIdClient xrpPayIdClient, String payId)
+   private Optional<String> getXrpAddress(XrpPayIdClient xrpPayIdClient, String payId)
    {
       Optional classicXrpAddress = Optional.empty();
       try {
