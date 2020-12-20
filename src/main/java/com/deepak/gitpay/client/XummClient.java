@@ -25,7 +25,7 @@ public class XummClient
 
    private final ObjectMapper objectMapper = new ObjectMapper();
 
-   public void callXumm(String destination, String amount)
+   public void callXumm(String destination, String amount, String memo )
    {
       try
       {
@@ -33,7 +33,7 @@ public class XummClient
          {
             destination = Utils.decodeXAddress(destination).address();
          }
-         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(getXummPaymentRequest( destination, amount )), getHttpHeaders());
+         HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(getXummPaymentRequest( destination, amount, memo )), getHttpHeaders());
          ResponseEntity<String> response = restTemplate.postForEntity(XUMM_URL, entity, String.class);
          System.out.println( "Xumm response : " + response.getBody());
       }
@@ -44,7 +44,7 @@ public class XummClient
 
    }
 
-   private XummPayment getXummPaymentRequest(String destination, String amount) {
+   private XummPayment getXummPaymentRequest(String destination, String amount, String memo ) {
       XummPayment paymentRequest = new XummPayment();
       Txjson txjson = Txjson.builder().transactionType("Payment").destination(destination).amount(amount).build();
       Options options = Options.builder().expire("1440").multisign("false").submit("true").build();
