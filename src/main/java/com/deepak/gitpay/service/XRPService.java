@@ -1,83 +1,89 @@
 package com.deepak.gitpay.service;
 
-import com.deepak.gitpay.controller.TestConstructs;
-import com.deepak.gitpay.model.AmountTransferRequest;
-import com.deepak.gitpay.model.AmountTransferResponse;
-import com.deepak.gitpay.model.BalanceResponse;
-import com.deepak.gitpay.model.ResponseStatus;
-import io.xpring.xrpl.ImmutableClassicAddress;
-import io.xpring.xrpl.TransactionStatus;
-import io.xpring.xrpl.Utils;
+import com.deepak.gitpay.client.XummClient;
+import com.deepak.gitpay.config.Config;
+import com.deepak.gitpay.config.XRPNetwork;
+import io.xpring.common.XrplNetwork;
+import io.xpring.payid.PayIdException;
+import io.xpring.payid.XrpPayIdClient;
+import io.xpring.xpring.XpringClient;
+import io.xpring.xrpl.Wallet;
+import io.xpring.xrpl.XrpClient;
 import io.xpring.xrpl.XrpException;
-import io.xpring.xrpl.model.XrpTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.Objects;
+import java.util.Optional;
 
 @Service
-public class XRPService {
-   private final TestConstructs testConstructs;
+public class XRPService
+{
+   private final Config config;
+   private final XummClient xummClient;
 
    @Autowired
-   XRPService(TestConstructs testConstructs) {
-      this.testConstructs = testConstructs;
+   public XRPService(Config config, XummClient xummClient) {
+      this.config = config;
+      this.xummClient = xummClient;
    }
 
-   public BalanceResponse getBalance(String address) {
-      BalanceResponse response = new BalanceResponse();
-      response.setAddress(address);
+
+   public void sendPayment(String payId, BigInteger amountToBeSent, String commitId ) throws XrpException, PayIdException {
+      XrplNetwork network = getXrplNetwork( config.getXrpNetwork().getEnvironment() );
+      System.out.println("Using XRP Environment : " + network.getNetworkName());
+
+      XrpPayIdClient xrpPayIdClient = new XrpPayIdClient( network );
+
+      final Optional<String> xrpAddress = getXrpAddress(xrpPayIdClient, payId);
+
+      if( !xrpAddress.isPresent() )
+      {
+         System.out.println("Skipping the payment because payId is not valid");
+         // TODO - throw an exception here.
+         return;
+      }
+
+      XrpClient xrpClient = new XrpClient( config.getXrpNetwork().getServer(), network );
+
+      XpringClient xpringClient = new XpringClient( xrpPayIdClient, xrpClient );
+
+
+      System.out.println("Sending xrp amount in drops: " + amountToBeSent +
+              " for commit Id: " + commitId +
+              " to payId: " + payId +
+              " and XRP Address: " + xrpAddress.get() );
+
+      String transactionHash = xpringClient.send( amountToBeSent, payId, new Wallet(config.getXrpNetwork().getWalletSeed()));
+
+      System.out.println("Transaction ID : " + transactionHash);
+
+      xummClient.callXumm( xrpAddress.get(), amountToBeSent.toString(), commitId );
+   }
+
+   private Optional<String> getXrpAddress(XrpPayIdClient xrpPayIdClient, String payId)
+   {
+      Optional classicXrpAddress = Optional.empty();
       try {
-         if (!Utils.isValidAddress(address)) {
-            response.setResponseStatus(ResponseStatus.FAILED);
-            response.setMessage("Not a valid address");
-            return response;
-         }
-
-         BigInteger balance = testConstructs.getXrpClient()
-                 .getBalance(transformClassicToXAddress(address))
-                 .divide(BigInteger.valueOf(10000L));
-         response.setResponseStatus(ResponseStatus.SUCCESS);
-         response.setBalance(balance.toString());
-      } catch (XrpException e) {
-         e.printStackTrace();
-         response.setResponseStatus(ResponseStatus.FAILED);
-         response.setMessage(e.getMessage());
+         classicXrpAddress = Optional.of( xrpPayIdClient.xrpAddressForPayId(payId) );
+         System.out.println( payId + " resolves to xrpAddress : " + classicXrpAddress.get() );
+      } catch (PayIdException e) {
+         System.out.println("Invalid Pay Id : " + payId + " because of " + e.getMessage() );
       }
-      return response;
+
+      return classicXrpAddress;
    }
 
-   public AmountTransferResponse sendAmount(AmountTransferRequest amountTransferRequest) {
-      AmountTransferResponse response = new AmountTransferResponse();
-      try {
-         if (!Utils.isValidAddress(amountTransferRequest.getDestinationAddress())) {
-            response.setTransactionStatus(TransactionStatus.FAILED);
-            response.setMessage("Not a valid address");
-            return response;
-         }
-
-         String transactionHash = testConstructs.getXrpClient()
-                 .send(amountTransferRequest.getAmount(),
-                         transformClassicToXAddress(amountTransferRequest.getDestinationAddress()),
-                         testConstructs.getWallet());
-         XrpTransaction xrpTransaction = testConstructs.getXrpClient().getPayment(transactionHash);
-         response.setTransaction(xrpTransaction);
-         TransactionStatus status = testConstructs.getXrpClient().getPaymentStatus(transactionHash);
-         response.setTransactionStatus(status);
-      } catch (XrpException e) {
-         e.printStackTrace();
-         response.setTransactionStatus(TransactionStatus.UNKNOWN);
-         response.setMessage(e.getMessage());
+   private XrplNetwork getXrplNetwork(XRPNetwork.Env env )
+   {
+      switch ( env )
+      {
+         case DEVNET:
+            return XrplNetwork.DEV;
+         case LIVENET:
+            return XrplNetwork.MAIN;
+         default:
+            return XrplNetwork.TEST;
       }
-      return response;
-   }
-
-   private String transformClassicToXAddress(String address) {
-      Objects.requireNonNull(address);
-      if (Utils.isValidXAddress(address)) {
-         return address;
-      }
-      return Utils.encodeXAddress(ImmutableClassicAddress.builder().address(address).isTest(true).build());
    }
 }

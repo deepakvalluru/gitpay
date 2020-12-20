@@ -24,16 +24,16 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.eclipse.mylyn.github</groupId>-->
-<!--            <artifactId>org.eclipse.egit.github.core</artifactId>-->
-<!--            <version>2.1.5</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>io.xpring</groupId>
             <artifactId>xpring4j</artifactId>
             <version>6.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.web3j</groupId>
+            <artifactId>core</artifactId>
+            <version>4.3.0</version>
         </dependency>
 
         <dependency>
