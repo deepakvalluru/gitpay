@@ -1,16 +1,13 @@
 package com.deepak.gitpay;
 
-import com.deepak.gitpay.controller.XRPController;
+import com.deepak.gitpay.controller.PayIdController;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import io.xpring.payid.generated.model.Address;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,13 +16,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import java.io.IOException;
-import java.util.List;
 
 @SpringBootApplication
 public class GitPayApplication {
 
    @Autowired
-   XRPController xrpController;
+   PayIdController payIdController;
 
    @Autowired
    private ConfigurableApplicationContext context;
@@ -39,7 +35,7 @@ public class GitPayApplication {
       return args -> {
 
          System.out.println("Running the application");
-         xrpController.getAddresses();
+         payIdController.pay();
          SpringApplication.exit( context );
       };
    }

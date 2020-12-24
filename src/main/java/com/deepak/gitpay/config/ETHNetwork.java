@@ -1,9 +1,11 @@
 package com.deepak.gitpay.config;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Getter
 public class ETHNetwork implements Network{
 
    @Value("${ether.name}")
@@ -23,6 +25,6 @@ public class ETHNetwork implements Network{
 
    public enum Env
 
-   { ROPSTEN,KOVAN, RINKEBY, GORLI }
+   { MAINNET, TESTNET }
 
 }

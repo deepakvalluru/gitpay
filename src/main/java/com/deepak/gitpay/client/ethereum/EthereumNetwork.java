@@ -3,10 +3,13 @@ package com.deepak.gitpay.client.ethereum;
 public enum EthereumNetwork {
 
   MAINNET("MAINNET"),
-  ROPSTEN("ROPSTEN"),
-  KOVAN("KOVAN"),
+  ROPSTEN("ROPSTEN");
+
+  // Using only ROPSTEN network for TESTNET.
+
+  /*KOVAN("KOVAN"),
   RINKEBY("RINKEBY"),
-  GORLI("GORLI");
+  GORLI("GORLI");*/
 
   private String networkName;
 
