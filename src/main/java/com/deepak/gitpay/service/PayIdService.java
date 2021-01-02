@@ -97,6 +97,7 @@ public class PayIdService
       System.out.println("XRP Amount distributed per commit = " + xrpAmountPerCommit);
       System.out.println("ETH Amount distributed per commit = " + ethAmountPerCommit);
 
+
       for( String commitId : commitPayIdMap.keySet() )
       {
          List<String> payIdsForThisCommit = commitPayIdMap.get(commitId);
