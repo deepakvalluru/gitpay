@@ -6,7 +6,9 @@ public interface Network
    {
       XRPL("XRPL", 1),
       ETH("ETH", 2),
-      BTC("BTC", 3);
+      BTC("BTC", 3),
+      ILP("ILP", 4 ),
+      INTERLEDGER("INTERLEDGER", 5);
 
       private String network;
       private int priority;

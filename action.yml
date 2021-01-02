@@ -12,7 +12,7 @@ inputs:
     description: 'The github token'
     required: true
   xrp_env:
-    description: 'XRP Environment to use: TESTNET OR LIVENET'
+    description: 'XRP Environment to use: TESTNET OR MAINNET'
     required: false
     default: TESTNET
   xrp_wallet_seed:

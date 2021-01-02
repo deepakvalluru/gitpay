@@ -9,6 +9,7 @@ import io.xpring.payid.PayIdClient;
 import io.xpring.payid.PayIdException;
 import io.xpring.payid.generated.model.Address;
 import io.xpring.xrpl.XrpException;
+import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHEventPayload;
 import org.kohsuke.github.GHPullRequestCommitDetail;
 import org.kohsuke.github.GitHub;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -38,9 +40,10 @@ public class PayIdService
 
    @Autowired
    PayIdService(Config config,
-                PayIdClient payIdClient, XRPService xrpService, ETHService ethService) {
+                XRPService xrpService,
+                ETHService ethService) {
       this.config = config;
-      this.payIdClient = payIdClient;
+      this.payIdClient = new PayIdClient();
       this.xrpService = xrpService;
       this.ethService = ethService;
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -82,13 +85,13 @@ public class PayIdService
       System.out.println("Printing all unique PayIDs: ");
       uniquePayIds.forEach(System.out::println);
 
-      int commitsWithValidPayId = commitPayIdMap.size();
+      int commitsWithValidPayId = commitPayIdMap.keySet().size();
 
       System.out.println("Total XRP Amount in drops distributed = " + config.getXrpNetwork().getAmount());
       System.out.println("Total ETH Amount distributed = " + config.getEthNetwork().getAmount());
 
       BigInteger xrpAmountPerCommit = new BigInteger(config.getXrpNetwork().getAmount()).divide( BigInteger.valueOf( commitsWithValidPayId ) );
-      BigInteger ethAmountPerCommit = new BigInteger(config.getEthNetwork().getAmount()).divide( BigInteger.valueOf( commitsWithValidPayId ) );
+      BigDecimal ethAmountPerCommit = new BigDecimal(config.getEthNetwork().getAmount()).divide( BigDecimal.valueOf( commitsWithValidPayId ) );
 
       System.out.println("XRP Amount distributed per commit = " + xrpAmountPerCommit);
       System.out.println("ETH Amount distributed per commit = " + ethAmountPerCommit);
@@ -108,22 +111,30 @@ public class PayIdService
 
             if( Network.SupportedNetwork.XRPL.equals( networkOptional.get() ) )
             {
-               xrpService.sendPayment(payId, xrpAmountPerCommit, commitId );
+               xrpService.sendPayment(payId, xrpAmountPerCommit.divide(BigInteger.valueOf(payIdsForThisCommit.size())), commitId );
             }
             else if( Network.SupportedNetwork.ETH.equals( networkOptional.get() ) )
             {
-               ethService.sendPayment(payId, String.valueOf( ethAmountPerCommit ), commitId );
+               ethService.sendPayment(payId, String.valueOf( ethAmountPerCommit.divide(BigDecimal.valueOf(payIdsForThisCommit.size())) ), commitId );
             }
-
+            else
+            {
+               System.out.println("Payment Network not supported yet - " + networkOptional.get() );
+               continue;
+            }
          }
       }
-
 
    }
 
    private Optional<Network.SupportedNetwork> determineNetworkToUse(String payId) throws PayIdException {
 
       Set<Network.SupportedNetwork> networksWithWallets = getSupportedNetworksThatHasValidWallets();
+      if( networksWithWallets.isEmpty() )
+      {
+         return Optional.empty();
+      }
+
       Set<Network.SupportedNetwork> payIdSupportedNetworks = getSupportedNetworksPresentInPayId(payId);
 
       if( payIdSupportedNetworks.isEmpty() )
@@ -131,25 +142,28 @@ public class PayIdService
          return Optional.empty();
       }
 
-      if( networksWithWallets.isEmpty() )
-      {
-         return Optional.of( new ArrayList<>(payIdSupportedNetworks).get(0) );
-      }
-
       Set<Network.SupportedNetwork> intersection = new HashSet<>( networksWithWallets );
       intersection.retainAll( payIdSupportedNetworks );
 
       if( intersection.isEmpty() )
       {
-         return Optional.of( new ArrayList<>(payIdSupportedNetworks).get(0) );
+         System.out.println("There is no common network between PayId supported Networks and given wallets");
+         return Optional.empty();
       }
 
       return Optional.of( new ArrayList<>(intersection).get(0) );
    }
 
-   private Set<Network.SupportedNetwork> getSupportedNetworksPresentInPayId(String payId) throws PayIdException {
-      List<Address> addresses = payIdClient.allAddressesForPayId(payId);
+   private Set<Network.SupportedNetwork> getSupportedNetworksPresentInPayId(String payId) {
+      List<Address> addresses;
+      try {
+         addresses = payIdClient.allAddressesForPayId(payId);
+      } catch (PayIdException e) {
+         System.out.println("Exception when getting addresses for the given payId: " + e.getMessage());
+         return Collections.emptySet();
+      }
 
+      // TODO - Have to filter out the network and environment combination.
       Set<Network.SupportedNetwork> payIdSupportedNetworks = addresses
                                                                .stream()
                                                                .map(address -> Network.SupportedNetwork.valueOf(address.getPaymentNetwork()))
@@ -160,17 +174,17 @@ public class PayIdService
    private Set<Network.SupportedNetwork> getSupportedNetworksThatHasValidWallets() {
       Set<Network.SupportedNetwork> networksWithWallets = new HashSet<>();
 
-      if( config.getXrpNetwork().getWalletSeed() != null )
+      if(StringUtils.isNotBlank( config.getXrpNetwork().getWalletSeed() ) )
       {
          networksWithWallets.add( config.getXrpNetwork().getName() );
       }
 
-      if( config.getEthNetwork().getWalletSeed() != null )
+      if( StringUtils.isNotBlank( config.getEthNetwork().getWalletSeed()) )
       {
          networksWithWallets.add( config.getEthNetwork().getName() );
       }
 
-      if( config.getBtcNetwork().getWalletSeed() != null )
+      if( StringUtils.isNotBlank( config.getBtcNetwork().getWalletSeed()) )
       {
          networksWithWallets.add( config.getBtcNetwork().getName() );
       }

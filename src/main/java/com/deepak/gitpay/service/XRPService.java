@@ -78,7 +78,7 @@ public class XRPService
    {
       switch ( env )
       {
-         case LIVENET:
+         case MAINNET:
             return XrplNetwork.MAIN;
          default:
             return XrplNetwork.TEST;

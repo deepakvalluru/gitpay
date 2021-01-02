@@ -35,9 +35,6 @@ public class ETHService
    public void sendPayment(String payId, String amountToBeSent, String commitId )
    {
 
-      // Recipient address
-      // String recipientAddress = "0x7975D1f0769eEfB7F8d902658574E485bACF72A0";
-
       EthereumNetwork network = getEthNetwork( config.getEthNetwork().getEnvironment() );
       System.out.println("Using ETH Environment : " + network.getNetworkName());
 
