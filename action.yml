@@ -12,7 +12,7 @@ inputs:
     description: 'The github token'
     required: true
   xrp_env:
-    description: 'XRP Environment to use: TESTNET, MAINNET OR LIVENET'
+    description: 'XRP Environment to use: TESTNET OR MAINNET'
     required: false
     default: TESTNET
   xrp_wallet_seed:
@@ -26,6 +26,21 @@ inputs:
     description: 'XRP ledger server to use for transactions'
     required: false
     default: test.xrp.xpring.io:50051
+  eth_env:
+    description: 'ETH Environment to use: TESTNET OR MAINNET. ROPSTEN used for TESTNET'
+    required: false
+    default: TESTNET
+  eth_wallet_seed:
+    description: 'The 12 words mnemonic where the payments are made from'
+    required: true
+  eth_amount:
+    description: 'Default eth amount that will be paid to the contributors'
+    required: false
+    default: '0.01'
+  eth_server:
+    description: 'ETH server to use for transactions'
+    required: false
+    default: https://ropsten.infura.io/v3/ed181538cfd34f6a86248de8890d82c4
 runs:
   using: docker
   image: Dockerfile

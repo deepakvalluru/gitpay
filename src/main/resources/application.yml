@@ -6,10 +6,10 @@ xrp:
   server: ${INPUT_XRP_SERVER:test.xrp.xpring.io:50051}
 ether:
   name: ETH
-  env: ROPSTEN
-  wallet_seed: 0x9c24D77E8A24dE30be9a3e6267f110C602d8EAd7
-  amount: 0.0001
-  server:
+  env: ${INPUT_ETH_ENV:TESTNET}
+  wallet_seed: ${INPUT_ETH_WALLET_SEED}
+  amount: 0.01
+  server: ${INPUT_ETH_SERVER:https://ropsten.infura.io/v3/ed181538cfd34f6a86248de8890d82c4}
 bitcoin:
   name: BTC
   env:

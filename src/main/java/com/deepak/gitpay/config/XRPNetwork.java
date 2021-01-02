@@ -25,5 +25,5 @@ public class XRPNetwork implements Network
 
    public enum Env
 
-   { DEVNET,TESTNET, LIVENET }
+   { TESTNET, MAINNET }
 }

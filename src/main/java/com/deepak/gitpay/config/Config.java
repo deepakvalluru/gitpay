@@ -13,7 +13,7 @@ public class Config
    private XRPNetwork xrpNetwork;
 
    @Autowired
-   private ETHNetwork   ethNetwork;
+   private ETHNetwork ethNetwork;
 
    @Autowired
    private BTCNetwork btcNetwork;
