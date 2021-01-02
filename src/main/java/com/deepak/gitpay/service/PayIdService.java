@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,7 +92,7 @@ public class PayIdService
       System.out.println("Total ETH Amount distributed = " + config.getEthNetwork().getAmount());
 
       BigInteger xrpAmountPerCommit = new BigInteger(config.getXrpNetwork().getAmount()).divide( BigInteger.valueOf( commitsWithValidPayId ) );
-      BigDecimal ethAmountPerCommit = new BigDecimal(config.getEthNetwork().getAmount()).divide( BigDecimal.valueOf( commitsWithValidPayId ) );
+      BigDecimal ethAmountPerCommit = new BigDecimal(config.getEthNetwork().getAmount()).divide( BigDecimal.valueOf( commitsWithValidPayId ), 6, RoundingMode.HALF_UP );
 
       System.out.println("XRP Amount distributed per commit = " + xrpAmountPerCommit);
       System.out.println("ETH Amount distributed per commit = " + ethAmountPerCommit);
