@@ -88,14 +88,14 @@ public class PayIdService
 
       int commitsWithValidPayId = commitPayIdMap.keySet().size();
 
-      System.out.println("Total XRP Amount in drops distributed = " + config.getXrpNetwork().getAmount());
-      System.out.println("Total ETH Amount distributed = " + config.getEthNetwork().getAmount());
+      System.out.println("Total XRP Amount in drops distributed = " + config.getXrpNetwork().getAmount() );
+      System.out.println("Total ETH Amount distributed = " + config.getEthNetwork().getAmount() );
 
       BigInteger xrpAmountPerCommit = new BigInteger(config.getXrpNetwork().getAmount()).divide( BigInteger.valueOf( commitsWithValidPayId ) );
       BigDecimal ethAmountPerCommit = new BigDecimal(config.getEthNetwork().getAmount()).divide( BigDecimal.valueOf( commitsWithValidPayId ), 6, RoundingMode.HALF_UP );
 
-      System.out.println("XRP Amount distributed per commit = " + xrpAmountPerCommit);
-      System.out.println("ETH Amount distributed per commit = " + ethAmountPerCommit);
+      System.out.println("XRP Amount distributed per commit = " + xrpAmountPerCommit );
+      System.out.println("ETH Amount distributed per commit = " + ethAmountPerCommit );
 
       for( String commitId : commitPayIdMap.keySet() )
       {
